@@ -24,52 +24,87 @@ window.onscroll = () => {
                 links.classList.remove('active');
                 document.querySelector('header nav a[href*=' + id + ']').classList.add('active');
             });
-            // active sections for animation on scroll
-            sec.classList.add('show-animate');
-        }
-        // if want to animation that repeats on scroll use this
-        else {
-            sec.classList.remove('show-animate');
         }
     });
 
     // sticky navbar
     let header = document.querySelector('header');
-
     header.classList.toggle('sticky', window.scrollY > 100);
 
     // remove toggle icon and navbar when click navbar links (scroll)
     menuIcon.classList.remove('bx-x');
     navbar.classList.remove('active');
-
-    // animation footer on scroll
-    let footer = document.querySelector('footer');
-
-    footer.classList.toggle('show-animate', this.innerHeight + this.scrollY >= document.scrollingElement.scrollHeight);
 }
 
+// Add reveal class to elements for IntersectionObserver
+document.querySelectorAll('section').forEach(sec => {
+    const elements = sec.querySelectorAll('h1, h2, h3, p, .btn, .experience-card, .skill-chip, .input-box, .textarea-field, .home-img, .about-img, .home-sci a');
+    elements.forEach((el, index) => {
+        el.classList.add('reveal');
+        // Stagger delay based on index (cap at 400ms)
+        const delay = Math.min(index * 100, 400);
+        el.style.transitionDelay = `${delay}ms`;
+    });
+});
+
+// Intersection Observer for animations
+const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.15
+};
+
+const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            
+            // Remove inline delay after animation so it doesn't affect hover states
+            const delay = parseInt(entry.target.style.transitionDelay) || 0;
+            setTimeout(() => {
+                entry.target.style.transitionDelay = '0ms';
+            }, delay + 800);
+        }
+    });
+}, observerOptions);
+
+document.querySelectorAll('.reveal').forEach(el => {
+    observer.observe(el);
+});
+
 /*=============== EMAIL JS ===============*/
-const contactForm = document.getElementById('contact-form'),
-    contactMessage = document.getElementById('contact-message')
+const contactForm = document.getElementById('contact-form');
+
+const showToast = (message, type = 'success') => {
+    const toastContainer = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.classList.add('toast');
+    if (type === 'error') toast.classList.add('error');
+    toast.textContent = message;
+    
+    toastContainer.appendChild(toast);
+    
+    // Trigger reflow to apply initial transform
+    toast.offsetHeight;
+    
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        // Wait for transition to finish before removing
+        setTimeout(() => toast.remove(), 500);
+    }, 4500);
+};
 
 const sendEmail = (e) =>{
      e.preventDefault()
      // serviceID - templateID - #form - publicKey
      emailjs.sendForm('service_jbvf28m','template_lg6zbru','#contact-form','2EPf1nGUpw6iVBIbA')
      .then(()=>{
-         // Show sent message
-         contactMessage.textContent = 'Message sent successfully ✅'
-
-         // Remove message after five seconds
-         setTimeout(()=>{
-            contactMessage.textContent = ''
-         }, 5000)
-
-         // Clear input fields
-         contactForm.reset()
+         showToast('Message sent successfully ✅', 'success');
+         contactForm.reset();
      }, ()=>{
-        // Show error message
-        contactMessage.textContent = 'Message not sent (service error) ❌'
+         showToast('Message not sent ❌', 'error');
      })
 }
 
