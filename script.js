@@ -38,7 +38,7 @@ window.onscroll = () => {
 
 // Add reveal class to elements for IntersectionObserver
 document.querySelectorAll('section').forEach(sec => {
-    const elements = sec.querySelectorAll('h1, h2, h3, p, .btn, .experience-card, .skill-chip, .input-box, .textarea-field, .home-img, .about-img, .home-sci a');
+    const elements = sec.querySelectorAll('h1, h2, h3, p, .btn, .experience-card, .project-card, .skill-chip, .input-box, .textarea-field, .home-img, .about-img, .home-sci a');
     elements.forEach((el, index) => {
         el.classList.add('reveal');
         // Stagger delay based on index (cap at 400ms)
