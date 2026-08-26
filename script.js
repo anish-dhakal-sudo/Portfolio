@@ -7,6 +7,28 @@ menuIcon.onclick = () => {
     navbar.classList.toggle('active');
 }
 
+/*=============== THEME TOGGLE ===============*/
+// No stored choice means the theme is coming from the OS preference, so we read
+// that to work out what the visitor is actually looking at before flipping it.
+const themeToggle = document.getElementById('theme-toggle');
+const rootElement = document.documentElement;
+
+const currentTheme = () => {
+    const explicit = rootElement.getAttribute('data-theme');
+    if (explicit) return explicit;
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+};
+
+themeToggle.addEventListener('click', () => {
+    const next = currentTheme() === 'light' ? 'dark' : 'light';
+    rootElement.setAttribute('data-theme', next);
+    try {
+        localStorage.setItem('theme', next);
+    } catch (e) {
+        // storage blocked (private mode) - the theme still applies for this visit
+    }
+});
+
 // scroll sections
 let sections = document.querySelectorAll('section');
 let navLinks = document.querySelectorAll('header nav a');
@@ -38,7 +60,7 @@ window.onscroll = () => {
 
 // Add reveal class to elements for IntersectionObserver
 document.querySelectorAll('section').forEach(sec => {
-    const elements = sec.querySelectorAll('h1, h2, h3, p, .btn, .experience-card, .project-card, .skill-chip, .input-box, .textarea-field, .home-img, .about-img, .home-sci a');
+    const elements = sec.querySelectorAll('h1, h2, h3, p, .btn, .experience-card, .project-card, .skill-chip, .input-box, .textarea-field, .home-img, .home-sci a');
     elements.forEach((el, index) => {
         el.classList.add('reveal');
         // Stagger delay based on index (cap at 400ms)

@@ -11,11 +11,46 @@
     font-family: 'Poppins', sans-serif;
 }
 
+/* ===== THEME TOKENS =====
+   Dark is the default. Light applies when the visitor's OS prefers light
+   (unless they explicitly chose dark), or when they pick light via the toggle. */
 :root {
     --bg-color: #081b29;
     --second-bg-color: #112e42;
     --text-color: #ededed;
+    --text-muted: #bbbbbb;
     --main-color: #00abf0;
+    --accent-rgb: 0, 171, 240;
+    /* readable text on top of an accent-filled surface */
+    --on-accent: #081b29;
+    --shadow-color: rgba(0, 0, 0, .3);
+    color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+        --bg-color: #ffffff;
+        --second-bg-color: #eef2f7;
+        --text-color: #0f172a;
+        --text-muted: #4a5a6e;
+        --main-color: #0278ad;
+        --accent-rgb: 2, 120, 173;
+        --on-accent: #ffffff;
+        --shadow-color: rgba(15, 23, 42, .12);
+        color-scheme: light;
+    }
+}
+
+:root[data-theme="light"] {
+    --bg-color: #ffffff;
+    --second-bg-color: #eef2f7;
+    --text-color: #0f172a;
+    --text-muted: #4a5a6e;
+    --main-color: #0278ad;
+    --accent-rgb: 2, 120, 173;
+    --on-accent: #ffffff;
+    --shadow-color: rgba(15, 23, 42, .12);
+    color-scheme: light;
 }
 
 html {
@@ -26,6 +61,7 @@ html {
 body {
     background: var(--bg-color);
     color: var(--text-color);
+    transition: background-color .4s ease, color .4s ease;
 }
 
 .header {
@@ -76,6 +112,79 @@ body {
     color: var(--text-color);
     cursor: pointer;
     display: none;
+}
+
+/* groups nav + theme toggle + hamburger on the right of the header */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.theme-toggle {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    flex-shrink: 0;
+    /* pairs with the .header-right gap to total 3.5rem - the same rhythm
+       as the margin between nav links */
+    margin-left: 2rem;
+    background: transparent;
+    border: .15rem solid var(--main-color);
+    border-radius: 50%;
+    font-size: 1.7rem;
+    color: var(--main-color);
+    cursor: pointer;
+    transition: .3s;
+}
+
+.theme-toggle:hover {
+    background: var(--main-color);
+    color: var(--on-accent);
+    transform: translateY(-.2rem);
+    box-shadow: 0 5px 15px rgba(var(--accent-rgb), .4);
+}
+
+/* the global `outline: none` reset would otherwise leave keyboard users with no focus cue */
+.theme-toggle:focus-visible {
+    outline: .2rem solid var(--main-color);
+    outline-offset: .3rem;
+}
+
+/* Icon reflects the theme you'd switch TO. Driven entirely by CSS so it stays
+   correct when the theme comes from the OS preference rather than a stored choice. */
+.theme-toggle .icon-sun {
+    display: block;
+}
+
+.theme-toggle .icon-moon {
+    display: none;
+}
+
+@media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .theme-toggle .icon-sun {
+        display: none;
+    }
+
+    :root:not([data-theme="dark"]) .theme-toggle .icon-moon {
+        display: block;
+    }
+}
+
+:root[data-theme="light"] .theme-toggle .icon-sun {
+    display: none;
+}
+
+:root[data-theme="light"] .theme-toggle .icon-moon {
+    display: block;
+}
+
+/* keep alternating section backgrounds in step with the body fade on theme switch */
+section,
+.footer {
+    transition: background-color .4s ease;
 }
 
 section {
@@ -179,18 +288,18 @@ section {
     font-size: 1.8rem;
     font-weight: 600;
     letter-spacing: .1rem;
-    color: var(--second-bg-color);
+    color: var(--on-accent);
     z-index: 1;
     overflow: hidden;
     transition: .3s;
-    box-shadow: 0 4px 15px rgba(0, 171, 240, 0.2);
+    box-shadow: 0 4px 15px rgba(var(--accent-rgb), .2);
 }
 
 .btn-box .btn:hover {
     background: transparent;
     color: var(--main-color);
     transform: translateY(-.3rem);
-    box-shadow: 0 5px 15px rgba(0, 171, 240, 0.4);
+    box-shadow: 0 5px 15px rgba(var(--accent-rgb), .4);
 }
 
 .btn-box .btn:active {
@@ -204,9 +313,9 @@ section {
 
 .btn-box .btn:nth-child(2):hover {
     background: var(--main-color);
-    color: var(--second-bg-color);
+    color: var(--on-accent);
     transform: translateY(-.3rem);
-    box-shadow: 0 5px 15px rgba(0, 171, 240, 0.4);
+    box-shadow: 0 5px 15px rgba(var(--accent-rgb), .4);
 }
 
 .home-sci {
@@ -236,9 +345,9 @@ section {
 
 .home-sci a:hover {
     background: var(--main-color);
-    color: var(--second-bg-color);
+    color: var(--on-accent);
     transform: translateY(-.3rem);
-    box-shadow: 0 5px 15px rgba(0, 171, 240, 0.4);
+    box-shadow: 0 5px 15px rgba(var(--accent-rgb), .4);
 }
 
 .home-img {
@@ -283,12 +392,11 @@ section {
     animation: aboutSpinner 8s linear infinite;
 }
 
+/* Plain block flow, like every other section. The old flex column centred its
+   children over the full 100vh, which pushed the heading toward the middle of
+   the viewport once the about photo was removed. */
 .about {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    gap: 2rem;
+    min-height: auto;
     background: var(--second-bg-color);
     padding-bottom: 6rem;
 }
@@ -304,45 +412,11 @@ span {
     color: var(--main-color);
 }
 
-.about-img {
-    position: relative;
-    width: 25rem !important;
-    height: 25rem !important;
-    border-radius: 50% !important;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden !important;
-}
-
-.about-img img {
-    width: 22.5rem !important;
-    height: 22.5rem !important;
-    border-radius: 50% !important;
-    border: .2rem solid var(--main-color);
-    object-fit: cover !important;
-    object-position: center !important;
-    display: block !important;
-    aspect-ratio: 1/1 !important;
-}
-
-.about-img .circle-spin {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(0);
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border-top: .2rem solid var(--second-bg-color);
-    border-bottom: .2rem solid var(--second-bg-color);
-    border-left: .2rem solid var(--main-color);
-    border-right: .2rem solid var(--main-color);
-    animation: aboutSpinner 8s linear infinite;
-}
-
+/* matches the max-width of .experience-container / .skills-container */
 .about-content {
     text-align: center;
+    max-width: 80rem;
+    margin: 0 auto;
 }
 
 .about-content h3 {
@@ -377,12 +451,13 @@ span {
     border-left: .4rem solid var(--main-color);
     border-radius: .6rem;
     padding: 2.5rem 3rem;
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    transition: transform 0.4s ease, box-shadow 0.4s ease, background-color 0.4s ease;
 }
 
-.experience-card:hover {
+/* same cascade problem as the project cards - see the note there */
+.experience-container .experience-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 171, 240, 0.15);
+    box-shadow: 0 10px 25px rgba(var(--accent-rgb), .15);
 }
 
 .experience-card.exp-minor {
@@ -417,7 +492,7 @@ span {
     display: flex;
     gap: 2rem;
     font-size: 1.4rem;
-    color: #bbb;
+    color: var(--text-muted);
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
 }
@@ -449,10 +524,13 @@ span {
 
 .project-card {
     background: var(--bg-color);
-    border-left: .4rem solid var(--main-color);
     border-radius: .6rem;
-    padding: 3rem;
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    /* the .4rem of extra left padding stands in for the accent bar, which is
+       drawn by ::before rather than by a border - see the note below */
+    padding: 3rem 3rem 3rem 3.4rem;
+    /* a resting shadow so the hover animates depth instead of conjuring a
+       shadow out of nothing - that jump was part of why the lift read badly */
+    box-shadow: 0 .2rem .8rem var(--shadow-color);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -460,9 +538,74 @@ span {
     overflow: hidden;
 }
 
-.project-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 171, 240, 0.15);
+/* Scoped to .projects-container on purpose. The reveal-on-scroll script adds
+   .reveal to every card, and `.reveal.active { transform: translateY(0) }` has the
+   same specificity as `.project-card:hover` but sits later in this file - so a
+   plain `.project-card:hover` transform loses the cascade and never runs.
+   The extra parent class outranks it. Same reason the transition is re-declared
+   here: `.reveal` would otherwise impose its own 0.8s curve. */
+/* The whole accent bar is this one pseudo-element - the card itself has no
+   border-left. Painting a border and an overlay edge to edge left a hairline
+   seam between them (the two boxes antialias independently, and the hover
+   transform landed their shared edge on a fractional device pixel), which read
+   as a white line down the middle of the bar.
+   It also can't be a border for a second reason: with `box-sizing: border-box`
+   a wider border eats into the content box, so animating its width reflowed the
+   text on every frame - visible on the card whose title and tags sit closest to
+   a wrap boundary. */
+/* The bar is always .6rem wide and sits squashed to .4rem at rest; hover just
+   releases it to full size. Animating `width` instead looked steppy: 1rem is
+   10px here, so that is 4px -> 6px, and width is a layout property that snaps to
+   whole device pixels - about three discrete frames of change, however long the
+   transition. scaleX is composited, so it interpolates at subpixel precision. */
+.project-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: .6rem;
+    background: var(--main-color);
+    transform: scaleX(0.6667);
+    transform-origin: left center;
+    transition: transform .35s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+}
+
+.projects-container .project-card {
+    transition: transform .35s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow .35s cubic-bezier(0.22, 1, 0.36, 1),
+        background-color .35s ease;
+}
+
+.projects-container .project-card:hover::before {
+    transform: scaleX(1);
+}
+
+/* Borrows the experience cards' smoothness - a straight lift on an ease-out
+   curve, no scale (scaling resampled the text and edges mid-transition) and no
+   overshoot. The travel and shadow are bigger than on those cards though: these
+   sit in a grid at roughly a third of the width, so a 5px lift barely reads.
+   The depth here comes from the shadow, not from the card growing. */
+.projects-container .project-card:hover {
+    transform: translateY(-1rem);
+    box-shadow: 0 1.8rem 3.5rem rgba(var(--accent-rgb), .22);
+    z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .projects-container .project-card,
+    .projects-container .project-card:hover {
+        transition-duration: .2s;
+        transform: none;
+    }
+
+    /* the bar keeps its scaleX - that is its resting size, not motion - but the
+       thickening is cut short along with everything else */
+    .projects-container .project-card::before {
+        transition-duration: .2s;
+    }
 }
 
 .project-header h3 {
@@ -529,9 +672,9 @@ span {
 
 .more-projects-btn .btn:hover {
     background: var(--main-color);
-    color: var(--second-bg-color);
+    color: var(--on-accent);
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 171, 240, 0.4);
+    box-shadow: 0 5px 15px rgba(var(--accent-rgb), .4);
 }
 
 .skills {
@@ -562,9 +705,9 @@ span {
 
 .skill-chip:hover {
     background: var(--main-color);
-    color: var(--bg-color);
+    color: var(--on-accent);
     transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 171, 240, 0.3);
+    box-shadow: 0 8px 20px rgba(var(--accent-rgb), .3);
 }
 
 .contact {
@@ -608,7 +751,7 @@ span {
 
 .contact form .input-box .input-field input::placeholder,
 .contact form .textarea-field textarea::placeholder {
-    color: var(--text-color);
+    color: var(--text-muted);
 }
 
 .contact form .focus {
@@ -695,9 +838,9 @@ span {
 
 .footer-social a:hover {
     background: var(--main-color);
-    color: var(--second-bg-color);
+    color: var(--on-accent);
     transform: translateY(-.3rem);
-    box-shadow: 0 5px 15px rgba(0, 171, 240, 0.4);
+    box-shadow: 0 5px 15px rgba(var(--accent-rgb), .4);
 }
 
 .footer-links {
@@ -796,7 +939,7 @@ span {
 
 .footer-iconTop a i {
     font-size: 2.4rem;
-    color: var(--bg-color);
+    color: var(--on-accent);
     transition: .5s;
 }
 
@@ -824,12 +967,12 @@ span {
 
 ::-moz-selection {
     /* Code for Firefox */
-    color: var(--second-bg-color);
+    color: var(--on-accent);
     background: var(--main-color);
 }
 
 ::selection {
-    color: var(--second-bg-color);
+    color: var(--on-accent);
     background: var(--main-color);
 }
 
@@ -929,6 +1072,11 @@ span {
 
     #menu-icon {
         display: block;
+    }
+
+    /* nav is out of flow here, so the toggle only needs to sit beside the hamburger */
+    .theme-toggle {
+        margin-left: 0;
     }
 
     .navbar {
@@ -1243,7 +1391,7 @@ span {
     border-radius: .6rem;
     font-size: 1.6rem;
     font-weight: 500;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 5px 15px var(--shadow-color);
     opacity: 0;
     transform: translateX(100%);
     transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
